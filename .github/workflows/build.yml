@@ -31,6 +31,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          pip install -r requirements.txt -r test-requirements.txt
           pip install build pytest
 
       - name: Build package
@@ -62,7 +63,15 @@ jobs:
             MAJOR=0; MINOR=0; PATCH=0
           fi
 
-          COMMITS=$(git log ${LATEST_TAG}..HEAD --first-parent --pretty=format:"%s")
+          if [ "$LATEST_TAG" = "v0.0.0" ]; then
+            COMMITS=$(git log --first-parent --pretty=format:"%s")
+          else
+            COMMITS=$(git log ${LATEST_TAG}..HEAD --first-parent --pretty=format:"%s")
+          fi
+          if [ -z "$COMMITS" ]; then
+            echo "should_release=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
           BREAKING=$(echo "$COMMITS" | grep -i "BREAKING CHANGE" || true)
           FEAT=$(echo "$COMMITS" | grep -iE "^feat(\(|:)" || true)
           FIX=$(echo "$COMMITS" | grep -iE "^fix(\(|:)" || true)
