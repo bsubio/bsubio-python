@@ -170,6 +170,3 @@ pip install git+https://github.com/bsubio/bsubio-python.git
 Email: contact@bsub.io
 Web: [bsub.io](https://bsub.io)
 
-
-
-
