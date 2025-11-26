@@ -57,11 +57,13 @@ jobs:
 
           if [ "$LATEST_TAG" = "v0.0.0" ]; then
             PYPROJECT_VERSION=$(python - <<'PY'
-import tomllib, pathlib
-data = tomllib.loads(pathlib.Path("pyproject.toml").read_text())
-print(data["project"]["version"])
-PY
-)
+              import tomllib
+              import pathlib
+
+              data = tomllib.loads(pathlib.Path("pyproject.toml").read_text())
+              print(data["project"]["version"])
+              PY
+              )
             echo "new_version=v${PYPROJECT_VERSION}" >> $GITHUB_OUTPUT
             echo "plain_version=${PYPROJECT_VERSION}" >> $GITHUB_OUTPUT
             echo "should_release=true" >> $GITHUB_OUTPUT
