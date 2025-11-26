@@ -55,6 +55,19 @@ jobs:
         run: |
           LATEST_TAG="${{ steps.get_tag.outputs.latest_tag }}"
 
+          if [ "$LATEST_TAG" = "v0.0.0" ]; then
+            PYPROJECT_VERSION=$(python - <<'PY'
+import tomllib, pathlib
+data = tomllib.loads(pathlib.Path("pyproject.toml").read_text())
+print(data["project"]["version"])
+PY
+)
+            echo "new_version=v${PYPROJECT_VERSION}" >> $GITHUB_OUTPUT
+            echo "plain_version=${PYPROJECT_VERSION}" >> $GITHUB_OUTPUT
+            echo "should_release=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
           if [[ $LATEST_TAG =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
             MAJOR="${BASH_REMATCH[1]}"
             MINOR="${BASH_REMATCH[2]}"
