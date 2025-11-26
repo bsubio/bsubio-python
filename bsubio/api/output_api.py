@@ -11,15 +11,11 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-import warnings
-from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
-from typing import Any, Dict, List, Optional, Tuple, Union
-from typing_extensions import Annotated
-
-from pydantic import Field, StrictBytes, StrictStr
-from typing import Tuple, Union
-from typing_extensions import Annotated
 from uuid import UUID
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+from pydantic import Field, StrictBytes, StrictFloat, StrictInt, StrictStr, validate_call
+from typing_extensions import Annotated
 
 from bsubio.api_client import ApiClient, RequestSerialized
 from bsubio.api_response import ApiResponse
@@ -575,5 +571,4 @@ class OutputApi:
             _host=_host,
             _request_auth=_request_auth
         )
-
 

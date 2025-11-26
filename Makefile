@@ -4,9 +4,11 @@ install:
 	pip install -r requirements.txt
 
 build: install
+	pip install -r test-requirements.txt
 	python -m build
 
 test:
+	pandoc -o test/test_pdf.pdf test/test_pdf.md
 	python -m pytest
 
 regenerate:

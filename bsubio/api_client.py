@@ -98,7 +98,11 @@ class ApiClient:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        pass
+        # Ensure HTTP connection pools are cleaned up when the client leaves
+        # a context manager block.
+        pool_manager = getattr(self.rest_client, "pool_manager", None)
+        if pool_manager and hasattr(pool_manager, "clear"):
+            pool_manager.clear()
 
     @property
     def user_agent(self):

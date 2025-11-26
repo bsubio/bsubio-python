@@ -12,41 +12,22 @@
 """  # noqa: E501
 
 
-import unittest
+import json
 
 from bsubio.models.create_job_request import CreateJobRequest
 
-class TestCreateJobRequest(unittest.TestCase):
-    """CreateJobRequest unit test stubs"""
 
-    def setUp(self):
-        pass
+def test_create_job_request_round_trips_to_json() -> None:
+    request = CreateJobRequest(type="passthru")
 
-    def tearDown(self):
-        pass
+    serialized = request.to_json()
+    parsed = CreateJobRequest.from_json(serialized)
 
-    def make_instance(self, include_optional) -> CreateJobRequest:
-        """Test CreateJobRequest
-            include_optional is a boolean, when False only required
-            params are included, when True both required and
-            optional params are included """
-        # uncomment below to create an instance of `CreateJobRequest`
-        """
-        model = CreateJobRequest()
-        if include_optional:
-            return CreateJobRequest(
-                type = 'pdf/extract'
-            )
-        else:
-            return CreateJobRequest(
-                type = 'pdf/extract',
-        )
-        """
+    assert parsed is not None
+    assert parsed.type == "passthru"
+    assert json.loads(serialized) == {"type": "passthru"}
 
-    def testCreateJobRequest(self):
-        """Test CreateJobRequest"""
-        # inst_req_only = self.make_instance(include_optional=False)
-        # inst_req_and_optional = self.make_instance(include_optional=True)
 
-if __name__ == '__main__':
-    unittest.main()
+def test_create_job_request_dict_excludes_none() -> None:
+    request = CreateJobRequest(type="passthru")
+    assert request.to_dict() == {"type": "passthru"}

@@ -49,12 +49,12 @@ Python 3.9+
 ## Installation & Usage
 ### pip install
 
-If the python package is hosted on a repository, you can install directly using:
+Install from PyPI:
 
 ```sh
-pip install git+https://github.com/GIT_USER_ID/GIT_REPO_ID.git
+pip install bsubio
 ```
-(you may need to run `pip` with root permission: `sudo pip install git+https://github.com/GIT_USER_ID/GIT_REPO_ID.git`)
+(or from source: `pip install git+https://github.com/bsubio/bsubio-python.git`)
 
 Then import the package:
 ```python
@@ -85,6 +85,7 @@ Please follow the [installation procedure](#installation--usage) and then run th
 
 ```python
 
+import os
 import bsubio
 from bsubio.rest import ApiException
 from pprint import pprint
@@ -172,7 +173,6 @@ Authentication schemes defined for the API:
 
 
 ## Author
-
 
 
 

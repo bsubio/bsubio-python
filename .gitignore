@@ -64,3 +64,6 @@ target/
 
 # Ipython Notebook
 .ipynb_checkpoints
+
+
+test/test_pdf.pdf

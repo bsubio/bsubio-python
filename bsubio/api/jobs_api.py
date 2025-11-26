@@ -10,16 +10,11 @@
 
     Do not edit the class manually.
 """  # noqa: E501
-
-import warnings
-from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
-from typing import Any, Dict, List, Optional, Tuple, Union
-from typing_extensions import Annotated
-
-from pydantic import Field, StrictBytes, StrictStr, field_validator
-from typing import Optional, Tuple, Union
-from typing_extensions import Annotated
 from uuid import UUID
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+from pydantic import Field, StrictBytes, StrictFloat, StrictInt, StrictStr, validate_call
+from typing_extensions import Annotated
 from bsubio.models.cancel_job200_response import CancelJob200Response
 from bsubio.models.create_job201_response import CreateJob201Response
 from bsubio.models.create_job_request import CreateJobRequest
@@ -1999,5 +1994,3 @@ class JobsApi:
             _host=_host,
             _request_auth=_request_auth
         )
-
-

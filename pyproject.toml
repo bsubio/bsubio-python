@@ -44,7 +44,7 @@ extension-pkg-whitelist = "pydantic"
 files = [
   "bsubio",
   #"test",  # auto-generated tests
-  "tests", # hand-written tests
+  "test", # hand-written tests
 ]
 # TODO: enable "strict" once all these individual checks are passing
 # strict = true
