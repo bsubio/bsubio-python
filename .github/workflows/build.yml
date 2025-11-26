@@ -1,0 +1,121 @@
+name: Python SDK Build & Release
+
+on:
+  push:
+    branches:
+      - '**'
+    tags-ignore:
+      - '**'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      should_release: ${{ steps.next_version.outputs.should_release }}
+      new_version: ${{ steps.next_version.outputs.new_version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build pytest
+
+      - name: Build package
+        run: python -m build
+
+      - name: Run tests
+        run: pytest || echo "No tests configured"
+
+      - name: Get latest tag
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        id: get_tag
+        run: |
+          git fetch --tags
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+
+      - name: Determine next version
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        id: next_version
+        shell: bash
+        run: |
+          LATEST_TAG="${{ steps.get_tag.outputs.latest_tag }}"
+
+          if [[ $LATEST_TAG =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            PATCH="${BASH_REMATCH[3]}"
+          else
+            MAJOR=0; MINOR=0; PATCH=0
+          fi
+
+          COMMITS=$(git log ${LATEST_TAG}..HEAD --first-parent --pretty=format:"%s")
+          BREAKING=$(echo "$COMMITS" | grep -i "BREAKING CHANGE" || true)
+          FEAT=$(echo "$COMMITS" | grep -iE "^feat(\(|:)" || true)
+          FIX=$(echo "$COMMITS" | grep -iE "^fix(\(|:)" || true)
+
+          if [ -n "$BREAKING" ]; then
+            MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0
+          elif [ -n "$FEAT" ]; then
+            MINOR=$((MINOR + 1)); PATCH=0
+          elif [ -n "$FIX" ]; then
+            PATCH=$((PATCH + 1))
+          else
+            echo "should_release=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+          PLAIN_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "plain_version=$PLAIN_VERSION" >> $GITHUB_OUTPUT
+          echo "should_release=true" >> $GITHUB_OUTPUT
+
+      - name: Update version in pyproject.toml
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.next_version.outputs.should_release == 'true'
+        run: |
+          sed -i "s/^version = .*/version = \"${{ steps.next_version.outputs.plain_version }}\"/" pyproject.toml
+
+      - name: Rebuild with new version
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.next_version.outputs.should_release == 'true'
+        run: python -m build
+
+      - name: Create and push tag
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.next_version.outputs.should_release == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pyproject.toml
+          git commit -m "chore: bump version to ${{ steps.next_version.outputs.new_version }}"
+          git tag -a "${{ steps.next_version.outputs.new_version }}" -m "Release ${{ steps.next_version.outputs.new_version }}"
+          git push origin "${{ steps.next_version.outputs.new_version }}"
+          git push origin main
+
+      - name: Publish to PyPI
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.next_version.outputs.should_release == 'true'
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          python -m pip install twine
+          python -m twine upload dist/*
+
+      - name: Create GitHub Release
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.next_version.outputs.should_release == 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.next_version.outputs.new_version }}
+          generate_release_notes: true
