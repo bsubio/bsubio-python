@@ -1,6 +1,6 @@
 [project]
 name = "bsubio"
-version = "0.0.5"
+version = "0.0.6"
 description = "bsub.io API"
 authors = [
   {name = "bsub.io",email = "contact@bsub.io"},
