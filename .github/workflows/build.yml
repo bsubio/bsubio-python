@@ -15,6 +15,10 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+      TWINE_USERNAME: __token__
+      TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
     outputs:
       should_release: ${{ steps.next_version.outputs.should_release }}
       new_version: ${{ steps.next_version.outputs.new_version }}
@@ -128,10 +132,11 @@ jobs:
 
       - name: Publish to PyPI
         if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.next_version.outputs.should_release == 'true'
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
+          if [ -z "$PYPI_API_TOKEN" ]; then
+            echo "PYPI_API_TOKEN is not set; skipping publish."
+            exit 1
+          fi
           python -m pip install twine
           python -m twine upload dist/*
 
