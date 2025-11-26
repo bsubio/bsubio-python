@@ -1,4 +1,5 @@
-# bsubio
+# bsubio - Python SDK for bsub.io
+
 REST API for batch processing compute-intensive workloads.
 
 Submit jobs, upload data, and retrieve results through a simple API.
@@ -173,6 +174,7 @@ Authentication schemes defined for the API:
 
 
 ## Author
+
 
 
 
