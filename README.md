@@ -1,4 +1,4 @@
-# bsubio-python
+# bsubio-python (beta)
 
 > Python SDK for [bsub.io](https://bsub.io) — zero-setup batch execution for compute-intensive workloads.
 
